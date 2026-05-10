@@ -1,0 +1,362 @@
+{
+  "k": 20,
+  "bic_optimal_k": 24,
+  "clusters": {
+    "0": {
+      "size": 1063,
+      "entropy": 0.06856346121419482,
+      "dominant": [
+        [
+          "soc.religion.christian",
+          0.5841956726246472
+        ],
+        [
+          "talk.religion.misc",
+          0.1909689557855127
+        ],
+        [
+          "alt.atheism",
+          0.18438381937911572
+        ]
+      ]
+    },
+    "1": {
+      "size": 1130,
+      "entropy": 0.0979747487335114,
+      "dominant": [
+        [
+          "rec.motorcycles",
+          0.5088495575221239
+        ],
+        [
+          "rec.autos",
+          0.4176991150442478
+        ],
+        [
+          "misc.forsale",
+          0.023893805309734513
+        ]
+      ]
+    },
+    "2": {
+      "size": 2278,
+      "entropy": 0.17859050004107857,
+      "dominant": [
+        [
+          "alt.atheism",
+          0.10052677787532924
+        ],
+        [
+          "talk.religion.misc",
+          0.09086918349429324
+        ],
+        [
+          "talk.politics.guns",
+          0.08691834942932397
+        ]
+      ]
+    },
+    "3": {
+      "size": 1036,
+      "entropy": 0.06864679923394784,
+      "dominant": [
+        [
+          "rec.sport.hockey",
+          0.5646718146718147
+        ],
+        [
+          "rec.sport.baseball",
+          0.42084942084942084
+        ],
+        [
+          "misc.forsale",
+          0.004826254826254826
+        ]
+      ]
+    },
+    "4": {
+      "size": 4122,
+      "entropy": 0.2245034367013272,
+      "dominant": [
+        [
+          "sci.med",
+          0.14871421639980592
+        ],
+        [
+          "sci.electronics",
+          0.08927704997573993
+        ],
+        [
+          "talk.politics.misc",
+          0.07714701601164484
+        ]
+      ]
+    },
+    "5": {
+      "size": 650,
+      "entropy": 0.17741575898048242,
+      "dominant": [
+        [
+          "sci.electronics",
+          0.10461538461538461
+        ],
+        [
+          "rec.motorcycles",
+          0.08
+        ],
+        [
+          "comp.graphics",
+          0.07846153846153846
+        ]
+      ]
+    },
+    "6": {
+      "size": 1489,
+      "entropy": 0.25565978042303605,
+      "dominant": [
+        [
+          "comp.graphics",
+          0.12693082605775688
+        ],
+        [
+          "sci.electronics",
+          0.10073875083948959
+        ],
+        [
+          "comp.windows.x",
+          0.09469442578912021
+        ]
+      ]
+    },
+    "7": {
+      "size": 1352,
+      "entropy": 0.12171302368839783,
+      "dominant": [
+        [
+          "comp.windows.x",
+          0.3868343195266272
+        ],
+        [
+          "comp.os.ms-windows.misc",
+          0.34393491124260356
+        ],
+        [
+          "comp.graphics",
+          0.16789940828402367
+        ]
+      ]
+    },
+    "8": {
+      "size": 1055,
+      "entropy": 0.13191750411570846,
+      "dominant": [
+        [
+          "talk.politics.guns",
+          0.48625592417061614
+        ],
+        [
+          "talk.politics.misc",
+          0.24834123222748816
+        ],
+        [
+          "talk.religion.misc",
+          0.11943127962085308
+        ]
+      ]
+    },
+    "9": {
+      "size": 533,
+      "entropy": 0.061009748812565004,
+      "dominant": [
+        [
+          "sci.crypt",
+          0.9362101313320825
+        ],
+        [
+          "comp.sys.ibm.pc.hardware",
+          0.01125703564727955
+        ],
+        [
+          "comp.windows.x",
+          0.01125703564727955
+        ]
+      ]
+    },
+    "10": {
+      "size": 241,
+      "entropy": 0.06943594699728725,
+      "dominant": [
+        [
+          "rec.sport.hockey",
+          0.3651452282157676
+        ],
+        [
+          "misc.forsale",
+          0.15352697095435686
+        ],
+        [
+          "rec.sport.baseball",
+          0.0995850622406639
+        ]
+      ]
+    },
+    "11": {
+      "size": 161,
+      "entropy": 0.0052569189106799665,
+      "dominant": [
+        [
+          "talk.politics.mideast",
+          0.9565217391304348
+        ],
+        [
+          "talk.politics.misc",
+          0.043478260869565216
+        ]
+      ]
+    },
+    "12": {
+      "size": 484,
+      "entropy": 0.06468439273792896,
+      "dominant": [
+        [
+          "comp.sys.ibm.pc.hardware",
+          0.44834710743801653
+        ],
+        [
+          "comp.sys.mac.hardware",
+          0.2644628099173554
+        ],
+        [
+          "misc.forsale",
+          0.15082644628099173
+        ]
+      ]
+    },
+    "13": {
+      "size": 986,
+      "entropy": 0.14368545228678772,
+      "dominant": [
+        [
+          "comp.graphics",
+          0.18864097363083165
+        ],
+        [
+          "comp.windows.x",
+          0.11866125760649088
+        ],
+        [
+          "comp.sys.mac.hardware",
+          0.10649087221095335
+        ]
+      ]
+    },
+    "14": {
+      "size": 233,
+      "entropy": 0.015770800837390034,
+      "dominant": [
+        [
+          "alt.atheism",
+          0.5493562231759657
+        ],
+        [
+          "talk.religion.misc",
+          0.44206008583690987
+        ],
+        [
+          "comp.os.ms-windows.misc",
+          0.004291845493562232
+        ]
+      ]
+    },
+    "15": {
+      "size": 551,
+      "entropy": 0.10126316557949583,
+      "dominant": [
+        [
+          "sci.space",
+          0.9038112522686026
+        ],
+        [
+          "sci.electronics",
+          0.018148820326678767
+        ],
+        [
+          "alt.atheism",
+          0.016333938294010888
+        ]
+      ]
+    },
+    "16": {
+      "size": 607,
+      "entropy": 0.056643520746716365,
+      "dominant": [
+        [
+          "misc.forsale",
+          0.8698517298187809
+        ],
+        [
+          "comp.sys.mac.hardware",
+          0.03130148270181219
+        ],
+        [
+          "rec.autos",
+          0.02471169686985173
+        ]
+      ]
+    },
+    "17": {
+      "size": 586,
+      "entropy": 0.14543017063833327,
+      "dominant": [
+        [
+          "sci.med",
+          0.15017064846416384
+        ],
+        [
+          "talk.politics.misc",
+          0.15017064846416384
+        ],
+        [
+          "talk.religion.misc",
+          0.10409556313993173
+        ]
+      ]
+    },
+    "18": {
+      "size": 812,
+      "entropy": 0.13235757788999394,
+      "dominant": [
+        [
+          "comp.sys.ibm.pc.hardware",
+          0.3448275862068966
+        ],
+        [
+          "comp.sys.mac.hardware",
+          0.31650246305418717
+        ],
+        [
+          "comp.os.ms-windows.misc",
+          0.10837438423645321
+        ]
+      ]
+    },
+    "19": {
+      "size": 413,
+      "entropy": 0.05243162931189184,
+      "dominant": [
+        [
+          "talk.politics.mideast",
+          0.9176755447941889
+        ],
+        [
+          "talk.politics.misc",
+          0.043583535108958835
+        ],
+        [
+          "alt.atheism",
+          0.009685230024213076
+        ]
+      ]
+    }
+  }
+}

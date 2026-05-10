@@ -1,0 +1,28 @@
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv
+venv
+env
+
+# Version control
+.git
+
+# Environment files
+.env
+
+# IDE files
+.vscode
+.idea
+
+# Raw dataset files (We don't need these in the container because the data/ models are already built)
+20_newsgroups/
+mini_newsgroups/
+mini_groups/
+
+# Logs
+logs/

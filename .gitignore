@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Environment variables
+.env
+
+# Raw Datasets (Do not upload these large directories to the cloud)
+20_newsgroups/
+mini_newsgroups/
+mini_groups/
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+logs/
+
+# Note: We are deliberately NOT ignoring the data/ directory,
+# because your pre-computed models (.pkl) need to be deployed to production!

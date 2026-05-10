@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Semantic Search Explorer — 20 Newsgroups</title>
+  <meta name="description" content="Semantic search with TF-IDF/LSA embeddings, GMM clustering, and a cluster-sharded semantic cache over the 20 Newsgroups corpus."/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230d1a2e'/><text x='50' y='68' text-anchor='middle' font-size='56' font-weight='900' fill='%2372e0c2'>N</text></svg>"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#07111f;--panel:rgba(15,25,44,.82);--line:rgba(157,184,221,.18);--text:#eef4ff;--muted:#9fb0cc;--accent:#72e0c2;--accent2:#ffb347;--accent3:#7ea8ff;--danger:#ff7085;--radius:22px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{min-height:100%;background:radial-gradient(circle at top left,rgba(114,224,194,.18),transparent 30%),radial-gradient(circle at top right,rgba(126,168,255,.16),transparent 28%),linear-gradient(180deg,#050b15 0%,var(--bg) 45%,#06101c 100%);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.6),transparent 95%);opacity:.25}
+    .shell{width:min(1400px,calc(100% - 32px));margin:0 auto;padding:24px 0 40px;position:relative;z-index:1}
+
+    /* Hero */
+    .hero{padding:30px 28px 24px;border:1px solid var(--line);border-radius:calc(var(--radius) + 8px);background:linear-gradient(180deg,rgba(18,31,55,.95),rgba(10,18,33,.88));box-shadow:0 24px 70px rgba(0,0,0,.35);overflow:hidden;position:relative}
+    .hero::after{content:"";position:absolute;inset:auto -10% -55% auto;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(114,224,194,.22),transparent 68%);filter:blur(18px);pointer-events:none}
+    .topbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+    .brand{display:flex;gap:16px;align-items:center}
+    .mark{width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,rgba(114,224,194,.95),rgba(126,168,255,.92));box-shadow:0 14px 35px rgba(126,168,255,.28);display:grid;place-items:center;color:#041018;font-weight:900;font-size:24px;letter-spacing:-.04em;animation:pulse-glow 3s ease-in-out infinite}
+    @keyframes pulse-glow{0%,100%{box-shadow:0 14px 35px rgba(126,168,255,.28)}50%{box-shadow:0 14px 45px rgba(114,224,194,.45)}}
+    .eyebrow{text-transform:uppercase;letter-spacing:.22em;color:var(--accent);font-size:.72rem;margin-bottom:8px;font-weight:700}
+    h1{font-size:clamp(2rem,5vw,3.8rem);line-height:.95;letter-spacing:-.06em;font-weight:900}
+    .subtitle{margin:14px 0 0;color:var(--muted);max-width:74ch;line-height:1.6;font-size:1.02rem}
+    .status-pill{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:999px;border:1px solid rgba(114,224,194,.22);background:rgba(114,224,194,.08);font-weight:700;white-space:nowrap;font-size:.92rem}
+    .status-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px rgba(114,224,194,.12);animation:blink 2s ease-in-out infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+    /* Metrics */
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+    .metric{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.04);padding:16px;min-height:96px;transition:transform .2s,border-color .2s,box-shadow .2s;backdrop-filter:blur(8px)}
+    .metric:hover{transform:translateY(-3px);border-color:rgba(114,224,194,.35);box-shadow:0 12px 30px rgba(114,224,194,.1)}
+    .metric .label{color:var(--muted);font-size:.78rem;margin-bottom:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+    .metric .value{font-size:clamp(1.2rem,2.5vw,1.8rem);font-weight:800;letter-spacing:-.05em}
+    .metric .sub{margin-top:8px;color:var(--muted);font-size:.85rem;line-height:1.45}
+
+    /* Panels & Grid */
+    .grid{margin-top:24px;display:grid;gap:18px;max-width:900px;margin-left:auto;margin-right:auto}
+    .panel{border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(18px);border-radius:var(--radius);box-shadow:0 24px 70px rgba(0,0,0,.35)}
+    .panel-inner{padding:22px}
+    .section-title{margin:0 0 14px;font-size:.95rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+
+    /* Composer */
+    .composer{display:grid;gap:14px}
+    .composer textarea{width:100%;min-height:120px;resize:vertical;border-radius:18px;border:1px solid rgba(255,255,255,.10);background:rgba(6,12,22,.74);color:var(--text);padding:16px 18px;font-size:1rem;line-height:1.55;outline:none;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+    .composer textarea:focus{border-color:rgba(114,224,194,.6);box-shadow:0 0 0 4px rgba(114,224,194,.12)}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .btn{border:0;border-radius:14px;padding:13px 18px;font-weight:800;letter-spacing:.01em;color:#06101c;cursor:pointer;font-family:inherit;font-size:.95rem;transition:transform .18s,box-shadow .18s,opacity .18s}
+    .btn:hover{transform:translateY(-2px)}
+    .btn:disabled{opacity:.6;cursor:progress}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),#b5ffe8);box-shadow:0 14px 26px rgba(114,224,194,.24)}
+    .btn-secondary{background:linear-gradient(135deg,#e8eef9,#cad6ea)}
+    .chips{display:flex;flex-wrap:wrap;gap:10px}
+    .chip{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:var(--text);border-radius:999px;padding:10px 14px;cursor:pointer;transition:transform .18s,border-color .18s;font-size:.88rem;font-family:inherit}
+    .chip:hover{transform:translateY(-1px);border-color:rgba(126,168,255,.5)}
+
+    /* Results */
+    .results{margin-top:18px}
+    .result-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+    .result-card{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.04);padding:14px;transition:transform .2s}
+    .result-card:hover{transform:translateY(-2px)}
+    .result-card .k{color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;margin-bottom:8px;font-weight:700}
+    .result-card .v{font-size:.95rem;font-weight:750;word-break:break-word}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-weight:700;font-size:.82rem}
+    .badge.good{background:rgba(114,224,194,.12);color:#bdf7e9}
+    .badge.warn{background:rgba(255,179,71,.14);color:#ffd9a8}
+
+    /* Structured result cards */
+    .result-list{display:grid;gap:14px}
+    .result-item{border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(16,26,46,.6),rgba(8,14,26,.8));padding:20px;transition:transform .2s,border-color .2s}
+    .result-item:hover{transform:translateY(-2px);border-color:rgba(114,224,194,.3)}
+    .result-item-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+    .rank-badge{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--accent3),var(--accent));display:grid;place-items:center;font-weight:900;font-size:.85rem;color:#041018;flex-shrink:0}
+    .category-tag{padding:6px 12px;border-radius:999px;font-size:.78rem;font-weight:700;text-transform:lowercase;letter-spacing:.04em}
+    .cat-sci{background:rgba(114,224,194,.15);color:#a0f0da}
+    .cat-comp{background:rgba(126,168,255,.15);color:#b8d4ff}
+    .cat-rec{background:rgba(255,179,71,.15);color:#ffd9a8}
+    .cat-talk{background:rgba(255,112,133,.15);color:#ffc4cc}
+    .cat-soc{background:rgba(180,130,255,.15);color:#dcc4ff}
+    .cat-misc{background:rgba(255,255,255,.08);color:var(--muted)}
+    .cat-alt{background:rgba(255,210,100,.15);color:#ffe6a8}
+    .sim-bar-wrap{flex:1;min-width:100px;display:flex;align-items:center;gap:10px}
+    .sim-bar-track{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+    .sim-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent3));transition:width .6s ease}
+    .sim-value{font-size:.82rem;font-weight:700;color:var(--accent);min-width:52px;text-align:right}
+    .result-snippet{color:var(--muted);font-size:.92rem;line-height:1.65}
+    .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:1rem;line-height:1.6}
+    .empty-state .icon{font-size:2.5rem;margin-bottom:12px;opacity:.5}
+
+    /* Loading */
+    .loading-spinner{display:none;text-align:center;padding:40px}
+    .loading-spinner.active{display:block}
+    .spinner{width:40px;height:40px;border:3px solid rgba(114,224,194,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Visuals */
+    .grid-bottom{margin-top:18px;display:grid;gap:18px;grid-template-columns:1fr 1fr;max-width:900px;margin-left:auto;margin-right:auto}
+    .chart{border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.03);transition:transform .2s}
+    .chart:hover{transform:translateY(-2px)}
+    .chart img{display:block;width:100%;height:auto}
+    .chart-label{padding:12px 16px;font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;border-top:1px solid rgba(255,255,255,.06)}
+
+    /* Cluster list */
+    .cluster-list{display:grid;gap:10px;max-height:420px;overflow:auto;padding-right:4px}
+    .cluster-item{border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 14px;background:rgba(255,255,255,.03);transition:transform .15s}
+    .cluster-item:hover{transform:translateY(-1px)}
+    .cluster-item .head{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;align-items:center}
+    .mini{color:var(--muted);font-size:.88rem;line-height:1.55}
+
+    /* Footer */
+    .footer{margin-top:28px;padding:20px;text-align:center;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}
+    .footer a{color:var(--accent);text-decoration:none;font-weight:700;transition:opacity .2s}
+    .footer a:hover{opacity:.8}
+    .tech-badges{display:flex;justify-content:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .tech-badge{padding:5px 12px;border-radius:999px;border:1px solid var(--line);font-size:.75rem;font-weight:700;color:var(--muted);background:rgba(255,255,255,.03)}
+
+    /* Animations */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+    .fade-up-d1{animation-delay:.1s}
+    .fade-up-d2{animation-delay:.2s}
+    .fade-up-d3{animation-delay:.3s}
+
+    /* Responsive */
+    @media(max-width:1100px){.metrics,.result-meta{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:720px){
+      .shell{width:min(100% - 20px,100%);padding-top:10px}
+      .hero{padding:22px 18px}
+      .panel-inner{padding:18px}
+      .metrics,.result-meta,.grid-bottom{grid-template-columns:1fr}
+      .actions{flex-direction:column;align-items:stretch}
+      .btn,.chip{width:100%;justify-content:center;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero panel fade-up">
+      <div class="topbar">
+        <div class="brand">
+          <div class="mark">N</div>
+          <div>
+            <div class="eyebrow">NLP &amp; ML Portfolio Project</div>
+            <h1>Semantic Search Explorer</h1>
+            <p class="subtitle">Query the 20 Newsgroups corpus with natural language. Powered by TF-IDF + LSA embeddings, GMM soft clustering, and a cluster-sharded semantic cache.</p>
+          </div>
+        </div>
+        <div class="status-pill"><span class="status-dot"></span><span id="service-status">Connecting...</span></div>
+      </div>
+      <div class="metrics" id="metrics"></div>
+    </section>
+
+    <section class="grid fade-up fade-up-d1">
+      <article class="panel">
+        <div class="panel-inner">
+          <h2 class="section-title">Semantic Query</h2>
+          <div class="composer">
+            <textarea id="query-input" placeholder="Try: NASA space shuttle mission details, Linux kernel crash, gun control legislation..."></textarea>
+            <div class="actions">
+              <button class="btn btn-primary" id="run-query">Run Semantic Search</button>
+              <button class="btn btn-secondary" id="clear-cache">Flush Cache</button>
+            </div>
+            <div class="chips" id="sample-queries"></div>
+          </div>
+
+          <div class="results">
+            <h2 class="section-title">Search Results</h2>
+            <div class="result-meta" id="result-meta"></div>
+            <div class="loading-spinner" id="loading"><div class="spinner"></div><div style="color:var(--muted)">Searching the corpus...</div></div>
+            <div id="result-output">
+              <div class="empty-state"><div class="icon">🔍</div>Run a query above to see semantically similar documents from the 20 Newsgroups corpus.</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <div class="grid-bottom fade-up fade-up-d2" id="visuals-section" style="display:none">
+      <div class="chart"><img id="img-tsne" src="/assets/tsne_clusters.png" alt="t-SNE cluster visualization"/><div class="chart-label">t-SNE Cluster Map</div></div>
+      <div class="chart"><img id="img-bic" src="/assets/bic_curve.png" alt="BIC curve for model selection"/><div class="chart-label">BIC Model Selection Curve</div></div>
+    </div>
+
+    <footer class="footer fade-up fade-up-d3">
+      <div>Built with <strong>FastAPI</strong> · <strong>scikit-learn</strong> · <strong>NumPy</strong></div>
+      <div class="tech-badges">
+        <span class="tech-badge">Python 3.11</span>
+        <span class="tech-badge">FastAPI</span>
+        <span class="tech-badge">TF-IDF + LSA</span>
+        <span class="tech-badge">GMM Clustering</span>
+        <span class="tech-badge">Semantic Cache</span>
+        <span class="tech-badge">Docker</span>
+      </div>
+      <div style="margin-top:10px">OpenAPI docs at <a href="/docs">/docs</a> · Health check at <a href="/health">/health</a></div>
+    </footer>
+  </main>
+
+  <script>
+    const st={overview:null};
+    const $=id=>document.getElementById(id);
+    const fmt=v=>(v==null)?"-":Number(v).toLocaleString();
+
+    const CAT_COLORS={sci:"cat-sci",comp:"cat-comp",rec:"cat-rec",talk:"cat-talk",soc:"cat-soc",alt:"cat-alt",misc:"cat-misc"};
+    function catClass(name){
+      for(const[k,v]of Object.entries(CAT_COLORS)){if(name.startsWith(k))return v;}
+      return"cat-misc";
+    }
+
+    function updateMetrics(o){
+      const entries=[
+        {label:"Dataset",value:o.dataset_name||"20_newsgroups",sub:(o.dataset_root||"").split(/[/\\]/).pop()},
+        {label:"Documents",value:fmt(o.document_count),sub:`${fmt(o.category_count)} categories`},
+        {label:"Embedding",value:(o.embedding_type||"lsa").toUpperCase(),sub:`θ = ${o.theta??"-"}`},
+        {label:"Cache Hit Rate",value:`${((o.cache?.hit_rate||0)*100).toFixed(1)}%`,sub:`${fmt(o.cache?.total_entries||0)} stored entries`},
+      ];
+      $("metrics").innerHTML=entries.map(i=>`<div class="metric"><div class="label">${i.label}</div><div class="value">${i.value}</div><div class="sub">${i.sub}</div></div>`).join("");
+      $("service-status").textContent=`${o.dataset_name||"20_newsgroups"} · ${fmt(o.document_count)} docs`;
+      $("sample-queries").innerHTML=(o.samples||[]).map(s=>`<button class="chip" data-query="${s}">${s}</button>`).join("");
+      document.querySelectorAll(".chip[data-query]").forEach(b=>{b.addEventListener("click",()=>{$("query-input").value=b.dataset.query;runQuery();});});
+    }
+
+    function parseResults(text){
+      const blocks=text.split(/\n\n+/).filter(b=>b.trim());
+      return blocks.map(b=>{
+        const m=b.match(/^\[(\d+)\]\s*\[([^\]]+)\]\s*\(sim=([\d.]+)\)\s*(.+)/s);
+        if(!m)return null;
+        return{rank:m[1],category:m[2],similarity:parseFloat(m[3]),snippet:m[4].replace(/\.\.\.$/,"")};
+      }).filter(Boolean);
+    }
+
+    function renderResult(r){
+      const badges=[
+        {k:"Cache",v:r.cache_hit?"HIT":"MISS",cls:r.cache_hit?"good":"warn"},
+        {k:"Matched Query",v:r.matched_query||"—"},
+        {k:"Similarity",v:r.similarity_score==null?"-":Number(r.similarity_score).toFixed(4)},
+        {k:"Cluster",v:r.dominant_cluster},
+      ];
+      $("result-meta").innerHTML=badges.map(i=>`<div class="result-card"><div class="k">${i.k}</div><div class="v ${i.cls?`badge ${i.cls}`:""}" style="display:inline-flex">${i.v}</div></div>`).join("");
+
+      const parsed=parseResults(r.result||"");
+      if(parsed.length===0){
+        $("result-output").innerHTML=`<div class="result-list"><div class="result-item"><div class="result-snippet">${(r.result||"No result.").replace(/</g,"&lt;")}</div></div></div>`;
+        return;
+      }
+      $("result-output").innerHTML=`<div class="result-list">${parsed.map(p=>{
+        const pct=Math.round(p.similarity*100);
+        return`<div class="result-item"><div class="result-item-header"><div class="rank-badge">${p.rank}</div><span class="category-tag ${catClass(p.category)}">${p.category}</span><div class="sim-bar-wrap"><div class="sim-bar-track"><div class="sim-bar-fill" style="width:${pct}%"></div></div><span class="sim-value">${(p.similarity*100).toFixed(1)}%</span></div></div><div class="result-snippet">${p.snippet.replace(/</g,"&lt;")}</div></div>`;
+      }).join("")}</div>`;
+    }
+
+    async function refreshOverview(){
+      const[o,c]=await Promise.all([fetch("/api/overview").then(r=>r.json()),fetch("/api/cluster-summary").then(r=>r.json())]);
+      st.overview=o;
+      updateMetrics(o);
+      // Show visuals if images exist
+      const vs=$("visuals-section");
+      if(vs){vs.style.display="";}
+    }
+
+    async function refreshCache(){
+      const s=await fetch("/cache/stats").then(r=>r.json());
+      if(!st.overview)return;
+      st.overview.cache=s;
+      updateMetrics(st.overview);
+    }
+
+    async function runQuery(){
+      const q=$("query-input").value.trim();
+      if(!q){$("result-output").innerHTML=`<div class="empty-state"><div class="icon">✏️</div>Enter a query first.</div>`;return;}
+      const btn=$("run-query");
+      btn.disabled=true;btn.textContent="Searching...";
+      $("loading").classList.add("active");
+      $("result-meta").innerHTML="";
+      $("result-output").innerHTML="";
+      try{
+        const res=await fetch("/query",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q})});
+        if(!res.ok){const e=await res.json();throw new Error(e.detail||"Query failed");}
+        $("loading").classList.remove("active");
+        renderResult(await res.json());
+        await refreshCache();
+      }catch(e){
+        $("loading").classList.remove("active");
+        $("result-output").innerHTML=`<div class="empty-state"><div class="icon">⚠️</div>${e.message}</div>`;
+      }finally{btn.disabled=false;btn.textContent="Run Semantic Search";}
+    }
+
+    async function flushCache(){
+      const btn=$("clear-cache");
+      btn.disabled=true;btn.textContent="Flushing...";
+      try{await fetch("/cache",{method:"DELETE"});await refreshCache();$("result-output").innerHTML=`<div class="empty-state"><div class="icon">🗑️</div>Cache flushed successfully.</div>`;$("result-meta").innerHTML="";}
+      finally{btn.disabled=false;btn.textContent="Flush Cache";}
+    }
+
+    $("run-query").addEventListener("click",runQuery);
+    $("clear-cache").addEventListener("click",flushCache);
+    $("query-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))runQuery();});
+
+    // Error handler for missing chart images
+    document.querySelectorAll(".chart img").forEach(img=>{img.onerror=()=>{img.parentElement.style.display="none";}});
+
+    (async()=>{try{await refreshOverview();await refreshCache();}catch(e){$("service-status").textContent="Connection failed";}})();
+  </script>
+</body>
+</html>

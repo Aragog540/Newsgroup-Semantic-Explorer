@@ -1,0 +1,49 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: newsgroup-semantic-explorer
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    environment:
+      - APP_NAME=${APP_NAME:-Newsgroup-Semantic-Explorer}
+      - APP_VERSION=${APP_VERSION:-1.0.0}
+      - DEBUG=${DEBUG:-False}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - HOST=0.0.0.0
+      - PORT=${PORT:-8000}
+      - WORKERS=${WORKERS:-4}
+      - DATASET_TYPE=${DATASET_TYPE:-20_newsgroups}
+      - NEWSGROUPS_PATH=${NEWSGROUPS_PATH:-}
+      - EMBEDDING_TYPE=${EMBEDDING_TYPE:-lsa}
+      - CACHE_ENABLED=${CACHE_ENABLED:-True}
+      - CACHE_THETA_LSA=${CACHE_THETA_LSA:-0.60}
+      - CACHE_THETA_NEURAL=${CACHE_THETA_NEURAL:-0.88}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - REQUIRE_HTTPS=${REQUIRE_HTTPS:-False}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-True}
+      - RATE_LIMIT_REQUESTS=${RATE_LIMIT_REQUESTS:-100}
+      - RATE_LIMIT_PERIOD=${RATE_LIMIT_PERIOD:-60}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - newsgroup-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  newsgroup-net:
+    driver: bridge
